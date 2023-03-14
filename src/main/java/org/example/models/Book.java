@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 
 public class Book {
+    public Book(){}
     public Book(int id, String book_name, String author, int year) {
         this.id = id;
         this.book_name = book_name;
