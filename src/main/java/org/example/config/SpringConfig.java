@@ -9,6 +9,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -38,6 +39,7 @@ public class SpringConfig implements WebMvcConfigurer {
         templateResolver.setApplicationContext(applicationContext);
         templateResolver.setPrefix("/WEB-INF/views/");
         templateResolver.setSuffix(".html");
+        templateResolver.setCharacterEncoding("UTF-8");
         return templateResolver;
     }
 
@@ -53,6 +55,8 @@ public class SpringConfig implements WebMvcConfigurer {
     public void configureViewResolvers(ViewResolverRegistry registry) {
         ThymeleafViewResolver resolver = new ThymeleafViewResolver();
         resolver.setTemplateEngine(templateEngine());
+        resolver.setCharacterEncoding("UTF-8");
+
         registry.viewResolver(resolver);
     }
 
@@ -61,11 +65,21 @@ public class SpringConfig implements WebMvcConfigurer {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
 
         dataSource.setDriverClassName("org.postgresql.Driver");
-        dataSource.setUrl("jdbc:postgresql://localhost:5432/first_db");
+        dataSource.setUrl("jdbc:postgresql://localhost:5432/project1");
         dataSource.setUsername("postgres");
         dataSource.setPassword("123456");
 
         return dataSource;
+    }
+    @Bean
+    public CommonsRequestLoggingFilter requestLoggingFilter() {
+        CommonsRequestLoggingFilter loggingFilter = new CommonsRequestLoggingFilter();
+        loggingFilter.setIncludeQueryString(true);
+        loggingFilter.setIncludePayload(true);
+        loggingFilter.setMaxPayloadLength(10000);
+        loggingFilter.setIncludeHeaders(false);
+        loggingFilter.setAfterMessagePrefix("REQUEST DATA : ");
+        return loggingFilter;
     }
 
     @Bean
@@ -73,3 +87,6 @@ public class SpringConfig implements WebMvcConfigurer {
         return new JdbcTemplate(dataSource());
     }
 }
+
+
+
