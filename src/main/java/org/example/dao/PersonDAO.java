@@ -3,17 +3,19 @@ package org.example.dao;
 import org.example.models.Book;
 import org.example.models.Person;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
+
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Component
+@Transactional
 public class PersonDAO {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final SessionFactory sessionFactory;
+
     @Autowired
     public PersonDAO(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -40,7 +42,7 @@ public class PersonDAO {
         jdbcTemplate.update("INSERT INTO PERSON(name,age) VALUES (?,?)",person.getName(),person.getAge());
     }
     //Валидация уникальности ФИО
-    public Optional<Person> geyPersonByName(String name){
+    public Optional<Person> getPersonByName(String name){
         return jdbcTemplate.query("SELECT * FROM PERSON WHERE name=?", new Object[]{name},
                 new BeanPropertyRowMapper<>(Person.class)).stream().findAny();
     }

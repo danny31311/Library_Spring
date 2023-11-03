@@ -1,15 +1,49 @@
 package org.example.models;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 
+
+@Entity
+@Table(name = "book")
 public class Book {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private int id;
+
+    @Column(name = "title")
+    @NotEmpty(message = "Title can not be empty")
+    private String title;
+
+    @Column(name = "author")
+    @NotEmpty(message = "String author can not be empty")
+    private String author;
+
+    @Column(name = "year")
+    @Min(value = 0, message = "I doubt you want add book which was written before B.C. ")
+    private int year;
+
+    @ManyToOne()
+    @JoinColumn(name = "person_id", referencedColumnName = "id")
+    private Person owner;
+
     public Book(){}
-    public Book(int id, String book_name, String author, int year) {
-        this.id = id;
-        this.book_name = book_name;
+
+    public Book( String title, String author, int year) {
+        this.title = title;
         this.author = author;
         this.year = year;
+    }
+
+    public Person getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Person owner) {
+        this.owner = owner;
     }
 
     public int getId() {
@@ -20,12 +54,12 @@ public class Book {
         this.id = id;
     }
 
-    public String getBook_name() {
-        return book_name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setBook_name(String book_name) {
-        this.book_name = book_name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getAuthor() {
@@ -44,12 +78,13 @@ public class Book {
         this.year = year;
     }
 
-    private int id;
-    @NotEmpty(message = "Book name can not be empty")
-    private String book_name;
-    @NotEmpty(message = "String author can not be empty")
-    private String author;
-    @Min(value = 0, message = "I doubt you want add book which was written B.C. ")
-    private int year;
-
+    @Override
+    public String toString() {
+        return "Book{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                ", year=" + year +
+                '}';
+    }
 }
