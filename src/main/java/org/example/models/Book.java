@@ -4,7 +4,17 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 
 public class Book {
-    public Book(){}
+    private int id;
+    @NotEmpty(message = "Book name can not be empty")
+    private String book_name;
+    @NotEmpty(message = "String author can not be empty")
+    private String author;
+    @Min(value = 0, message = "I doubt you want add book which was written B.C. ")
+    private int year;
+
+    public Book() {
+    }
+
     public Book(int id, String book_name, String author, int year) {
         this.id = id;
         this.book_name = book_name;
@@ -44,12 +54,5 @@ public class Book {
         this.year = year;
     }
 
-    private int id;
-    @NotEmpty(message = "Book name can not be empty")
-    private String book_name;
-    @NotEmpty(message = "String author can not be empty")
-    private String author;
-    @Min(value = 0, message = "I doubt you want add book which was written B.C. ")
-    private int year;
 
 }

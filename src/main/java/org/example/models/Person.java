@@ -4,12 +4,21 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 
 public class Person {
+    private int id;
+    @NotEmpty(message = "Name can not be empty")
+    private String name;
+
+    @Min(value = 0, message = "I absolutely sure you are older than 0")
+    private int age;
+
     public Person(int id, String name, int age) {
         this.id = id;
         this.name = name;
         this.age = age;
     }
-    public Person(){}
+
+    public Person() {
+    }
 
     public int getId() {
         return id;
@@ -35,10 +44,5 @@ public class Person {
         this.age = age;
     }
 
-    private int id;
-    @NotEmpty(message = "Name can not be empty")
-    private String name;
 
-    @Min(value = 0, message = "I absolutely sure you are older than 0")
-    private int age;
 }

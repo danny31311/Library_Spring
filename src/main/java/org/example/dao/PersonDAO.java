@@ -40,7 +40,7 @@ public class PersonDAO {
         jdbcTemplate.update("INSERT INTO PERSON(name,age) VALUES (?,?)",person.getName(),person.getAge());
     }
     //Валидация уникальности ФИО
-    public Optional<Person> geyPersonByName(String name){
+    public Optional<Person> getPersonByName(String name){
         return jdbcTemplate.query("SELECT * FROM PERSON WHERE name=?", new Object[]{name},
                 new BeanPropertyRowMapper<>(Person.class)).stream().findAny();
     }

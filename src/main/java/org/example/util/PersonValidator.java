@@ -20,15 +20,15 @@ public class PersonValidator implements Validator {
     public boolean supports(Class<?> clazz) {
         return Person.class.equals(clazz );
     }
-
+    //есть ли человек с таким же имененм в БД
     @Override
     public void validate(Object target, Errors errors) {
         Person person = (Person) target;
-        if(personDAO.show(person.getName()).isPresent()){
+        if(personDAO.getPersonByName(person.getName()).isPresent()){
             errors.rejectValue("name", "","This name is already taken");
         }
 
-        //Посмотреть, есть ли человек с таким же имененм в БД
+
 
     }
 }
