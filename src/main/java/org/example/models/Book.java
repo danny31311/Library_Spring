@@ -1,25 +1,63 @@
 package org.example.models;
 
+
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 
+import java.util.Date;
+
+@Entity
+@Table(name = "book")
 public class Book {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
-    @NotEmpty(message = "Book name can not be empty")
+
+    @Column(name = "title")
+    @NotEmpty(message = "message can not me empty")
     private String title;
-    @NotEmpty(message = "String author can not be empty")
+
+    @Column(name = "author")
+    @NotEmpty(message = "Author can not be empty")
     private String author;
-    @Min(value = 0, message = "I doubt you want add book which was written B.C. ")
+
+
+    @Column(name = "year")
+    @Min(value = 1500, message = "book must be written in 1500 or later")
     private int year;
+
+    @Column(name = "taken_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date takenAt;
+
+
+    @ManyToOne
+    @JoinColumn(name = "person_id", referencedColumnName = "id")
+    private Person owner;
+
+    @Transient
+    private Boolean expired = false;
 
     public Book() {
     }
 
-    public Book(int id, String title, String author, int year) {
-        this.id = id;
+    public Book(String title, String author, int year) {
         this.title = title;
         this.author = author;
         this.year = year;
+    }
+
+    @Override
+    public String toString() {
+        return "Book{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                ", yearOfProduction=" + year +
+                '}';
     }
 
     public int getId() {
@@ -54,5 +92,27 @@ public class Book {
         this.year = year;
     }
 
+    public Date getTakenAt() {
+        return takenAt;
+    }
 
+    public void setTakenAt(Date takenAt) {
+        this.takenAt = takenAt;
+    }
+
+    public Person getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Person owner) {
+        this.owner = owner;
+    }
+
+    public Boolean getExpired() {
+        return expired;
+    }
+
+    public void setExpired(Boolean expired) {
+        this.expired = expired;
+    }
 }
