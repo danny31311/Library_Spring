@@ -2,52 +2,76 @@ package org.example.dao;
 
 import org.example.models.Book;
 import org.example.models.Person;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Component
-@Transactional
+@Transactional(readOnly = true)
 public class PersonDAO {
 
     private final SessionFactory sessionFactory;
 
     @Autowired
-    public PersonDAO(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public PersonDAO(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+
     }
-    public List<Person> index(){
-        return jdbcTemplate.query("SELECT * FROM PERSON", new BeanPropertyRowMapper<>(Person.class));
+
+    public List<Person> index() {
+        Session session = sessionFactory.getCurrentSession();
+        return session.createQuery("FROM Person", Person.class).getResultList();
     }
-    public Optional<Person> show(String name){
-        return jdbcTemplate.query("SELECT * FROM PERSON WHERE name = ?", new Object[]{name}, new BeanPropertyRowMapper<>(Person.class))
-                .stream().findAny();
+
+    public Person show(String name) {
+        Session session = sessionFactory.getCurrentSession();
+        return session.get(Person.class, name);
     }
-    public Person show(int id){
-        return jdbcTemplate.query("SELECT * FROM PERSON WHERE id=?", new Object[]{id}, new BeanPropertyRowMapper<>(Person.class))
-                .stream().findAny().orElse(null);
+
+    public Person show(int id) {
+        Session session = sessionFactory.getCurrentSession();
+        return session.get(Person.class, id);
     }
+
+    @Transactional
     public void update(int id, Person updatedPerson) {
-        jdbcTemplate.update("UPDATE PERSON SET name=?, age=? WHERE id=?", updatedPerson.getName(),
-                updatedPerson.getAge(),id);
+        Session session = sessionFactory.getCurrentSession();
+        Person personWhichWillBeUpdated = session.get(Person.class, id);
+        personWhichWillBeUpdated.setName(updatedPerson.getName());
+        personWhichWillBeUpdated.setAge(updatedPerson.getAge());
+        personWhichWillBeUpdated.setBooks(updatedPerson.getBooks());
+
     }
-    public void delete(int id){
-        jdbcTemplate.update("DELETE FROM PERSON WHERE id = ?", id);
+
+    @Transactional
+    public void delete(int id) {
+        Session session = sessionFactory.getCurrentSession();
+        session.remove(session.get(Person.class, id));
+
     }
-    public void save(Person person){
-        jdbcTemplate.update("INSERT INTO PERSON(name,age) VALUES (?,?)",person.getName(),person.getAge());
+
+    @Transactional
+    public void save(Person person) {
+        Session session = sessionFactory.getCurrentSession();
+        session.save(person);
     }
+
     //Валидация уникальности ФИО
-    public Optional<Person> getPersonByName(String name){
-        return jdbcTemplate.query("SELECT * FROM PERSON WHERE name=?", new Object[]{name},
-                new BeanPropertyRowMapper<>(Person.class)).stream().findAny();
+    public Optional<Person> getPersonByName(String name) {
+        Session session = sessionFactory.getCurrentSession();
+        return session.createQuery("FROM Person where name = name", Person.class).stream().findAny();
     }
-    public List<Book> getBooksByPersonId(int id){
-        return jdbcTemplate.query("SELECT * FROM BOOK WHERE person_id = ?", new Object[]{id},
-                new BeanPropertyRowMapper<>(Book.class));
+
+    public List<Book> getBooksByPersonId(int id) {
+        Session session = sessionFactory.getCurrentSession();
+        return session.createQuery("SELECT b FROM Book b where b.owner.id=:id", Book.class).setParameter("id", id).getResultList();
+
     }
 }

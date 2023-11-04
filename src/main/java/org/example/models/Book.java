@@ -1,8 +1,10 @@
 package org.example.models;
 
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
+
 
 
 @Entity

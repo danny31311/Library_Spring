@@ -1,5 +1,6 @@
 package org.example.controllers;
 
+
 import jakarta.validation.Valid;
 import org.example.dao.BookDAO;
 import org.example.dao.PersonDAO;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+
 
 import java.util.Optional;
 
@@ -79,7 +82,7 @@ public class BookController {
 
     @PatchMapping("/{id}/assign")
     public String assign(@PathVariable("id") int id, @ModelAttribute("person") Person selectedPerson){
-        //selectedperson имеет только значение id, остальные null
+        //selectedPerson имеет только значение id, остальные null
         bookDAO.assign(id, selectedPerson);
         return "redirect:/books/" + id;
     }

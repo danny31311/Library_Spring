@@ -2,54 +2,80 @@ package org.example.dao;
 
 import org.example.models.Book;
 import org.example.models.Person;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
+@Transactional
 @Component
+@EnableTransactionManagement
 public class BookDAO {
-    private final JdbcTemplate jdbcTemplate;
+
+    private final SessionFactory sessionFactory;
+
     @Autowired
-    public BookDAO(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-    public List<Book> index(){
-        return jdbcTemplate.query("SELECT * FROM BOOK", new BeanPropertyRowMapper<>(Book.class));
+    public BookDAO(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
-    public Book show(int id){
-        return jdbcTemplate.query("SELECT * FROM BOOK WHERE id = ?", new Object[]{id}, new BeanPropertyRowMapper<>(Book.class))
-                .stream().findAny().orElse(null);
+    public List<Book> index() {
+        Session session = sessionFactory.getCurrentSession();
+        return session.createQuery("FROM Book", Book.class).getResultList();
     }
 
-    public void save(Book book){
-        jdbcTemplate.update("INSERT INTO BOOK (book_name , author, year) VALUES(?,?,?)", book.getTitle(),
-                book.getAuthor(), book.getYear());
+    public Book show(int id) {
+        Session session = sessionFactory.getCurrentSession();
+        return session.get(Book.class, id);
+
     }
-    public void delete(int id){
-        jdbcTemplate.update("DELETE FROM BOOK WHERE id =?", id);
+
+    public void save(Book book) {
+        Session session = sessionFactory.getCurrentSession();
+        session.save(book);
+
+    }
+
+    public void delete(int id) {
+        Session session = sessionFactory.getCurrentSession();
+        session.remove(session.get(Book.class, id));
+
     }
 
 
+    public void update(int id, Book updatedBook) {
+        Session session = sessionFactory.getCurrentSession();
+        Book bookWhichWillBeUpdated = session.get(Book.class, id);
+        bookWhichWillBeUpdated.setTitle(updatedBook.getTitle());
+        bookWhichWillBeUpdated.setYear(updatedBook.getYear());
+        bookWhichWillBeUpdated.setAuthor(updatedBook.getAuthor());
+        bookWhichWillBeUpdated.setOwner(updatedBook.getOwner());
+    }
 
-    public void update(int id, Book updatedBook){
-        jdbcTemplate.update("UPDATE BOOK SET book_name=?, author = ?, year = ? WHERE id =?",
-               updatedBook.getTitle(), updatedBook.getAuthor(), updatedBook.getYear(),
-                id);
+    public void assign(int id, Person selectedPerson) {
+        Session session = sessionFactory.getCurrentSession();
+        Book book = session.get(Book.class, id);
+        book.setOwner(selectedPerson);
     }
-    public void assign(int id, Person selectedPerson){
-        jdbcTemplate.update("UPDATE BOOK SET person_id=? WHERE id=?", selectedPerson.getId(), id);
+
+    public void release(int id) {
+        Session session = sessionFactory.getCurrentSession();
+        Book book = session.get(Book.class, id);
+        book.setOwner(null);
     }
-    public void release(int id){
-        jdbcTemplate.update("UPDATE BOOK SET person_id=NULL WHERE id=?", id);
-    }
-    public Optional<Person> getBookOwner(int id){
-        return jdbcTemplate.query("SELECT PERSON.* FROM BOOK JOIN PERSON ON BOOK.person_id=PERSON.id "+
-                "WHERE BOOK.id=?",new Object[]{id},new BeanPropertyRowMapper<>(Person.class)).stream().findAny();
+
+    public Optional<Person> getBookOwner(int id) {
+        Session session = sessionFactory.getCurrentSession();
+        return session.createQuery("SELECT p FROM Person as p JOIN p.books b WHERE b.id= :id", Person.class)
+                .setParameter("id", id).stream().findAny();
+
     }
 
 }
